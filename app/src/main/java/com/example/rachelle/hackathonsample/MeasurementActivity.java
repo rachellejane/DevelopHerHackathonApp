@@ -25,10 +25,11 @@ public class MeasurementActivity extends Activity {
     private static final String TAG = "MeasurementActivity: ";
 
     private static final int LINES_TO_READ = 50;
-    private static final double BASELINE_BUST_MEASUREMENT = 36.0; //starting measurements in resting garment
-    private static final double BASELINE_WAIST_MEASUREMENT = 26.0;
+    private static final double BASELINE_BUST_MEASUREMENT = 34.0; //starting measurements in resting garment
+    private static final double BASELINE_WAIST_MEASUREMENT = 29.0;
     private static final double BASELINE_HIP_MEASUREMENT = 36.0;
     private static final int HALF_INCH_OR_CM_SENSOR_CALIBRATION = 25;
+    private static final int RESTING_GARMENT_SENSOR = 190;
 
     private int testLinesRead;
 
@@ -158,24 +159,44 @@ public class MeasurementActivity extends Activity {
 
         //The assumption is that <190 represents a resting sensor with no change in the original measurement,
         //which will be determined by measuring the garment in a relaxed state
-        if (bustAverage < 190){
+        if (bustAverage < RESTING_GARMENT_SENSOR){
             bust = BASELINE_BUST_MEASUREMENT;
         } else {
-
+            int growth = (int) Math.round(bustAverage - RESTING_GARMENT_SENSOR);
+            bust = BASELINE_BUST_MEASUREMENT + computeGrowthAmount(growth);
         }
 
-                /*
+        if (waistAverage < RESTING_GARMENT_SENSOR){
+            waist = BASELINE_WAIST_MEASUREMENT;
+        } else {
+            int growth = (int) Math.round(waistAverage - RESTING_GARMENT_SENSOR);
+            waist = BASELINE_WAIST_MEASUREMENT + computeGrowthAmount(growth);
+        }
+
+        if (hipAverage < RESTING_GARMENT_SENSOR){
+            hip = BASELINE_HIP_MEASUREMENT;
+        } else {
+            int growth = (int) Math.round(hipAverage - RESTING_GARMENT_SENSOR);
+            hip = BASELINE_HIP_MEASUREMENT + computeGrowthAmount(growth);
+        }
+
         Intent intent = new Intent(this, ViewMeasurements.class);
         intent.putExtra("bust", bust);
         intent.putExtra("waist", waist);
         intent.putExtra("hip", hip);
         startActivity(intent);
         finish();
-        */
     }
 
     private double computeGrowthAmount(int growthBeyondSensorBaseline){
-        
+        double growthAmount = 0.0;
+        if (growthBeyondSensorBaseline < HALF_INCH_OR_CM_SENSOR_CALIBRATION){
+            //if less than the threshold
+            growthAmount = 0.0;
+        } else {
+            growthAmount = growthBeyondSensorBaseline / HALF_INCH_OR_CM_SENSOR_CALIBRATION;
+        }
+        return growthAmount;
     }
 
     private void close(Closeable aConnectedObject) {
