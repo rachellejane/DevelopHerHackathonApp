@@ -158,11 +158,6 @@ public class MainActivity extends Activity {
     private void readFromBluetoothModule(BluetoothDevice device) throws IOException{
         Log.d(TAG, "Entered readFromBluetoothModule");
 
-        //For now, skip directly to MeasurementActivity
-        Intent intent = new Intent(this, MeasurementActivity.class);
-        startActivity(intent);
-
-        /*
         try{
             BluetoothDevices.bluetoothSocket = device.createRfcommSocketToServiceRecord( getSerialPortUUID() );
             BluetoothDevices.bluetoothSocket.connect();
@@ -185,8 +180,9 @@ public class MainActivity extends Activity {
             }.run();
 
             if (testLinesRead <= TEST_LINES_TO_READ){
-                Intent intent = new Intent(this, MeasurementActivity.class);
-                startActivity(intent);
+                //if we can read a small number of lines, we can proceed to the actual measurement recording
+                //Intent intent = new Intent(this, MeasurementActivity.class);
+                //startActivity(intent);
             }
 
         } catch (IOException e){
@@ -195,7 +191,7 @@ public class MainActivity extends Activity {
             close( BluetoothDevices.bluetoothSocket );
             throw e;
         }
-        */
+
     }
 
 
