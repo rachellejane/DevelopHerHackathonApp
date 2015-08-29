@@ -36,16 +36,12 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final String UUID_SERIAL_PORT_PROFILE
-            = "00001101-0000-1000-8000-00805F9B34FB";
+    private static final String UUID_SERIAL_PORT_PROFILE = "00001101-0000-1000-8000-00805F9B34FB";
     private static final String TAG = "MainActivity: ";
+    private static final String NAME_BLUETOOTH_MODULE="HC-06";
+    private static final String NAME_APP = "Fiddle";
 
-
-    private Button onBtn;
-    private Button offBtn;
     private Button listBtn;
-    private Button findBtn;
-    private TextView text;
     private BluetoothAdapter myBluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
     private List<BluetoothDevice> pairedDevicesList;
@@ -60,38 +56,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // take an instance of BluetoothAdapter - Bluetooth radio
+        // take an instance of BluetoothAdapter
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(myBluetoothAdapter == null) {
-            onBtn.setEnabled(false);
-            offBtn.setEnabled(false);
             listBtn.setEnabled(false);
-            text.setText("Status: not supported");
 
             Toast.makeText(getApplicationContext(),"Your device does not support Bluetooth",
                     Toast.LENGTH_LONG).show();
         } else {
-            text = (TextView) findViewById(R.id.text);
-            onBtn = (Button)findViewById(R.id.turnOn);
-            onBtn.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    on(v);
-                }
-            });
-
-            offBtn = (Button)findViewById(R.id.turnOff);
-            offBtn.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    off(v);
-                }
-            });
-
             listBtn = (Button)findViewById(R.id.paired);
             listBtn.setOnClickListener(new OnClickListener() {
 
@@ -128,10 +100,8 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
         if(requestCode == REQUEST_ENABLE_BT){
-            if(myBluetoothAdapter.isEnabled()) {
-                text.setText("Status: Enabled");
-            } else {
-                text.setText("Status: Disabled");
+            if(!myBluetoothAdapter.isEnabled()) {
+                Toast.makeText(MainActivity.this, "Please enable bluetooth to use this app!", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -143,8 +113,10 @@ public class MainActivity extends Activity {
 
         // put it's one to the adapter
         for(BluetoothDevice device : pairedDevices) {
-            BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-            pairedDevicesList.add(device);
+            if (device.getName().equalsIgnoreCase(NAME_BLUETOOTH_MODULE)){
+                BTArrayAdapter.add(NAME_APP);
+                pairedDevicesList.add(device);
+            }
         }
 
         for (BluetoothDevice device : pairedDevicesList){
@@ -186,7 +158,6 @@ public class MainActivity extends Activity {
 
     public void off(View view){
         myBluetoothAdapter.disable();
-        text.setText("Status: Disconnected");
 
         Toast.makeText(getApplicationContext(),"Bluetooth turned off",
                 Toast.LENGTH_LONG).show();
