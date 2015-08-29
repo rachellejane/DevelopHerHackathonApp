@@ -29,6 +29,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ public class MainActivity extends Activity {
     private List<BluetoothDevice> pairedDevicesList;
     private ListView myListView;
     private ArrayAdapter<String> BTArrayAdapter;
+    private ImageView pairWithFiddleButton;
 
     private BluetoothSocket mSocket = null;
     private BufferedReader mBufferedReader = null;
@@ -64,8 +66,8 @@ public class MainActivity extends Activity {
             Toast.makeText(getApplicationContext(),"Your device does not support Bluetooth",
                     Toast.LENGTH_LONG).show();
         } else {
-            listBtn = (Button)findViewById(R.id.paired);
-            listBtn.setOnClickListener(new OnClickListener() {
+            pairWithFiddleButton = (ImageView) findViewById(R.id.pair_with_fiddle_button);
+            pairWithFiddleButton.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
@@ -114,31 +116,23 @@ public class MainActivity extends Activity {
         // put it's one to the adapter
         for(BluetoothDevice device : pairedDevices) {
             if (device.getName().equalsIgnoreCase(NAME_BLUETOOTH_MODULE)){
-                BTArrayAdapter.add(NAME_APP);
                 pairedDevicesList.add(device);
             }
         }
 
         for (BluetoothDevice device : pairedDevicesList){
             Log.d(TAG, "Found device on list: "+device.getName());
-        }
-
-        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "Selected item at pos: " + position);
-                Log.d(TAG, "Selected: " + pairedDevicesList.get(position).getName());
+            if (device.getName().equalsIgnoreCase(NAME_BLUETOOTH_MODULE)){
                 try {
-                    //openDeviceConnection(device);
-                    readFromBluetoothModule(pairedDevicesList.get(position));
+                    readFromBluetoothModule(device);
                 } catch (IOException e){
                     Log.d(TAG, "Caught IOException trying to open device connection");
                     e.printStackTrace();
                     Log.d(TAG, "E: " + e.getMessage());
+                    Toast.makeText(MainActivity.this, "Failed to connect with Fiddle", Toast.LENGTH_LONG);
                 }
             }
-        });
-
+        }
 
     }
 

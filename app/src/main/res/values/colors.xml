@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="light_brown">#9E8982</color>
+    <color name="darker_brown">#4D433F</color>
+    <color name="peach_backdrop">#FFD8CB</color>
 </resources>
