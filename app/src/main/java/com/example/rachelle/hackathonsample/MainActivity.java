@@ -154,12 +154,15 @@ public class MainActivity extends Activity {
         myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "Selected item at pos: "+position);
-                Log.d(TAG, "Selected: "+pairedDevicesList.get(position).getName());
+                Log.d(TAG, "Selected item at pos: " + position);
+                Log.d(TAG, "Selected: " + pairedDevicesList.get(position).getName());
                 try {
-                    openDeviceConnection(pairedDevicesList.get(position));
+                    //openDeviceConnection(device);
+                    readFromBluetoothModule(pairedDevicesList.get(position));
                 } catch (IOException e){
+                    Log.d(TAG, "Caught IOException trying to open device connection");
                     e.printStackTrace();
+                    Log.d(TAG, "E: " + e.getMessage());
                 }
             }
         });
@@ -177,13 +180,6 @@ public class MainActivity extends Activity {
                 // add the name and the MAC address of the object to the arrayAdapter
                 BTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
                 BTArrayAdapter.notifyDataSetChanged();
-                try {
-                    openDeviceConnection(device);
-                } catch (IOException e){
-                    Log.d(TAG, "Caught IOException trying to open device connection");
-                    e.printStackTrace();
-                    Log.d(TAG, "E: "+e.getMessage());
-                }
             }
         }
     };
@@ -201,6 +197,39 @@ public class MainActivity extends Activity {
         // TODO Auto-generated method stub
         super.onDestroy();
         unregisterReceiver(bReceiver);
+    }
+
+    //Big issue is that reading continually from the buffer chokes the UI thread, run on a worker thread
+    private void readFromBluetoothModule(BluetoothDevice device) throws IOException{
+        Log.d(TAG, "Entered readFromBluetoothModule");
+
+        try{
+            mSocket = device.createRfcommSocketToServiceRecord( getSerialPortUUID() );
+            mSocket.connect();
+            final InputStream stream = mSocket.getInputStream();
+            final InputStreamReader streamReader = new InputStreamReader(stream);
+            mBufferedReader = new BufferedReader(streamReader);
+
+            new Runnable(){
+                public void run(){
+                    int linesRead = 0;
+                    while (mSocket.isConnected() && linesRead < 20){
+                        try {
+                            Log.d(TAG, "Output: " + mBufferedReader.readLine());
+                            linesRead++;
+                        } catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }.run();
+
+        } catch (IOException e){
+            Log.e(TAG, "Could not connect to device", e);
+            close( mBufferedReader );
+            close( mSocket );
+            throw e;
+        }
     }
 
 
