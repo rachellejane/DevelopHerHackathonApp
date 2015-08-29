@@ -8,4 +8,11 @@
     <string name="off">Turn Off</string>
     <string name="List">Pair with Fiddle</string>
     <string name="Find">Search new Devices / Cancel</string>
+
+    <string name="fitting_instructions">
+        1. Stand straight, but relaxed.\n
+        2. Make sure there are no ripples or wrinkles in the Fiddle garment.\n
+        3. Breathe normally.\n
+        4. Press below when you\'re ready to capture your measurements.\n
+    </string>
 </resources>

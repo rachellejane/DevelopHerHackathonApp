@@ -36,16 +36,13 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-    private static final int REQUEST_ENABLE_BT = 1;
-    private static final String UUID_SERIAL_PORT_PROFILE = "00001101-0000-1000-8000-00805F9B34FB";
     private static final String TAG = "MainActivity: ";
-    private static final String NAME_BLUETOOTH_MODULE="HC-06";
     private static final String NAME_APP = "Fiddle";
+    private static final int TEST_LINES_TO_READ = 10;
+
+    private int testLinesRead;
 
     private Button listBtn;
-    private BluetoothAdapter myBluetoothAdapter;
-    private Set<BluetoothDevice> pairedDevices;
-    private List<BluetoothDevice> pairedDevicesList;
     private ListView myListView;
     private ArrayAdapter<String> BTArrayAdapter;
     private ImageView pairWithFiddleButton;
@@ -59,8 +56,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         // take an instance of BluetoothAdapter
-        myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(myBluetoothAdapter == null) {
+        BluetoothDevices.myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(BluetoothDevices.myBluetoothAdapter == null) {
             listBtn.setEnabled(false);
 
             Toast.makeText(getApplicationContext(),"Your device does not support Bluetooth",
@@ -85,9 +82,9 @@ public class MainActivity extends Activity {
     }
 
     public void on(View view){
-        if (!myBluetoothAdapter.isEnabled()) {
+        if (!BluetoothDevices.myBluetoothAdapter.isEnabled()) {
             Intent turnOnIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(turnOnIntent, REQUEST_ENABLE_BT);
+            startActivityForResult(turnOnIntent, BluetoothDevices.REQUEST_ENABLE_BT);
 
             Toast.makeText(getApplicationContext(),"Bluetooth turned on" ,
                     Toast.LENGTH_LONG).show();
@@ -101,8 +98,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
-        if(requestCode == REQUEST_ENABLE_BT){
-            if(!myBluetoothAdapter.isEnabled()) {
+        if(requestCode == BluetoothDevices.REQUEST_ENABLE_BT){
+            if(!BluetoothDevices.myBluetoothAdapter.isEnabled()) {
                 Toast.makeText(MainActivity.this, "Please enable bluetooth to use this app!", Toast.LENGTH_LONG).show();
             }
         }
@@ -110,30 +107,24 @@ public class MainActivity extends Activity {
 
     public void list(View view){
         // get paired devices
-        pairedDevicesList = new ArrayList<BluetoothDevice>();
-        pairedDevices = myBluetoothAdapter.getBondedDevices();
+        BluetoothDevices.pairedDevicesList = new ArrayList<BluetoothDevice>();
+        BluetoothDevices.pairedDevices = BluetoothDevices.myBluetoothAdapter.getBondedDevices();
 
         // put it's one to the adapter
-        for(BluetoothDevice device : pairedDevices) {
-            if (device.getName().equalsIgnoreCase(NAME_BLUETOOTH_MODULE)){
-                pairedDevicesList.add(device);
-            }
-        }
-
-        for (BluetoothDevice device : pairedDevicesList){
-            Log.d(TAG, "Found device on list: "+device.getName());
-            if (device.getName().equalsIgnoreCase(NAME_BLUETOOTH_MODULE)){
+        for(BluetoothDevice device : BluetoothDevices.pairedDevices) {
+            Log.d(TAG, "Found paired device: "+device.getName());
+            if (device.getName().equalsIgnoreCase(BluetoothDevices.NAME_BLUETOOTH_MODULE)){
+                BluetoothDevices.fiddleBluetoothDevice = device;
                 try {
-                    readFromBluetoothModule(device);
+                    readFromBluetoothModule(BluetoothDevices.fiddleBluetoothDevice);
                 } catch (IOException e){
                     Log.d(TAG, "Caught IOException trying to open device connection");
                     e.printStackTrace();
                     Log.d(TAG, "E: " + e.getMessage());
-                    Toast.makeText(MainActivity.this, "Failed to connect with Fiddle", Toast.LENGTH_LONG);
+                    Toast.makeText(MainActivity.this, "Failed to connect with Fiddle", Toast.LENGTH_LONG).show();
                 }
             }
         }
-
     }
 
     final BroadcastReceiver bReceiver = new BroadcastReceiver() {
@@ -151,7 +142,7 @@ public class MainActivity extends Activity {
     };
 
     public void off(View view){
-        myBluetoothAdapter.disable();
+        BluetoothDevices.myBluetoothAdapter.disable();
 
         Toast.makeText(getApplicationContext(),"Bluetooth turned off",
                 Toast.LENGTH_LONG).show();
@@ -168,6 +159,11 @@ public class MainActivity extends Activity {
     private void readFromBluetoothModule(BluetoothDevice device) throws IOException{
         Log.d(TAG, "Entered readFromBluetoothModule");
 
+        //For now, skip directly to MeasurementActivity
+        Intent intent = new Intent(this, MeasurementActivity.class);
+        startActivity(intent);
+
+        /*
         try{
             mSocket = device.createRfcommSocketToServiceRecord( getSerialPortUUID() );
             mSocket.connect();
@@ -177,11 +173,11 @@ public class MainActivity extends Activity {
 
             new Runnable(){
                 public void run(){
-                    int linesRead = 0;
-                    while (mSocket.isConnected() && linesRead < 20){
+                    testLinesRead = 0;
+                    while (mSocket.isConnected() && testLinesRead < TEST_LINES_TO_READ){
                         try {
                             Log.d(TAG, "Output: " + mBufferedReader.readLine());
-                            linesRead++;
+                            testLinesRead++;
                         } catch (IOException e){
                             e.printStackTrace();
                         }
@@ -189,12 +185,18 @@ public class MainActivity extends Activity {
                 }
             }.run();
 
+            if (testLinesRead <= TEST_LINES_TO_READ){
+                Intent intent = new Intent(this, MeasurementActivity.class);
+                startActivity(intent);
+            }
+
         } catch (IOException e){
             Log.e(TAG, "Could not connect to device", e);
             close( mBufferedReader );
             close( mSocket );
             throw e;
         }
+        */
     }
 
 
@@ -239,7 +241,7 @@ public class MainActivity extends Activity {
     }
 
     private UUID getSerialPortUUID() {
-        return UUID.fromString( UUID_SERIAL_PORT_PROFILE );
+        return UUID.fromString( BluetoothDevices.UUID_SERIAL_PORT_PROFILE );
     }
 
 }
