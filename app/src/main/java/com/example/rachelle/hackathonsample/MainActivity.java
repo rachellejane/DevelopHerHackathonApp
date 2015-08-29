@@ -47,7 +47,6 @@ public class MainActivity extends Activity {
     private ArrayAdapter<String> BTArrayAdapter;
     private ImageView pairWithFiddleButton;
 
-    private BluetoothSocket mSocket = null;
     private BufferedReader mBufferedReader = null;
 
     @Override
@@ -165,16 +164,16 @@ public class MainActivity extends Activity {
 
         /*
         try{
-            mSocket = device.createRfcommSocketToServiceRecord( getSerialPortUUID() );
-            mSocket.connect();
-            final InputStream stream = mSocket.getInputStream();
+            BluetoothDevices.bluetoothSocket = device.createRfcommSocketToServiceRecord( getSerialPortUUID() );
+            BluetoothDevices.bluetoothSocket.connect();
+            final InputStream stream = BluetoothDevices.bluetoothSocket.getInputStream();
             final InputStreamReader streamReader = new InputStreamReader(stream);
             mBufferedReader = new BufferedReader(streamReader);
 
             new Runnable(){
                 public void run(){
                     testLinesRead = 0;
-                    while (mSocket.isConnected() && testLinesRead < TEST_LINES_TO_READ){
+                    while (BluetoothDevices.bluetoothSocket.isConnected() && testLinesRead < TEST_LINES_TO_READ){
                         try {
                             Log.d(TAG, "Output: " + mBufferedReader.readLine());
                             testLinesRead++;
@@ -193,7 +192,7 @@ public class MainActivity extends Activity {
         } catch (IOException e){
             Log.e(TAG, "Could not connect to device", e);
             close( mBufferedReader );
-            close( mSocket );
+            close( BluetoothDevices.bluetoothSocket );
             throw e;
         }
         */
@@ -207,14 +206,14 @@ public class MainActivity extends Activity {
             InputStreamReader aReader = null;
             try {
                 Log.d(TAG, "Successfully connected to device");
-                mSocket = aDevice.createRfcommSocketToServiceRecord( getSerialPortUUID() );
-                mSocket.connect();
-                aStream = mSocket.getInputStream();
+                BluetoothDevices.bluetoothSocket = aDevice.createRfcommSocketToServiceRecord( getSerialPortUUID() );
+                BluetoothDevices.bluetoothSocket.connect();
+                aStream = BluetoothDevices.bluetoothSocket.getInputStream();
                 aReader = new InputStreamReader( aStream );
                 mBufferedReader = new BufferedReader( aReader );
                 String output = "";
 
-                while (mSocket.isConnected()){
+                while (BluetoothDevices.bluetoothSocket.isConnected()){
                     output = mBufferedReader.readLine();
                     Log.d(TAG, "Output: "+output);
                 }
@@ -226,7 +225,7 @@ public class MainActivity extends Activity {
                 close( mBufferedReader );
                 close( aReader );
                 close( aStream );
-                close( mSocket );
+                close( BluetoothDevices.bluetoothSocket );
                 throw e;
             }
     }

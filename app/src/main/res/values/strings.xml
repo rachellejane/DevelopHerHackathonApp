@@ -15,4 +15,9 @@
         3. Breathe normally.\n
         4. Press below when you\'re ready to capture your measurements.\n
     </string>
+
+    <string name="email_instructions">
+        Enter a short message below with any necessary information for the vendor.\n
+        Your measurements will be included automatically.
+    </string>
 </resources>

@@ -2,6 +2,7 @@ package com.example.rachelle.hackathonsample;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 
 import java.util.List;
 import java.util.Set;
@@ -18,4 +19,5 @@ public class BluetoothDevices {
     public static Set<BluetoothDevice> pairedDevices;
     public static List<BluetoothDevice> pairedDevicesList;
     public static BluetoothDevice fiddleBluetoothDevice;
+    public static BluetoothSocket bluetoothSocket;
 }
