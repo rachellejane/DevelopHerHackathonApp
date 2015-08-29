@@ -181,8 +181,8 @@ public class MainActivity extends Activity {
 
             if (testLinesRead <= TEST_LINES_TO_READ){
                 //if we can read a small number of lines, we can proceed to the actual measurement recording
-                //Intent intent = new Intent(this, MeasurementActivity.class);
-                //startActivity(intent);
+                Intent intent = new Intent(this, MeasurementActivity.class);
+                startActivity(intent);
             }
 
         } catch (IOException e){
@@ -191,6 +191,7 @@ public class MainActivity extends Activity {
             close( BluetoothDevices.bluetoothSocket );
             throw e;
         }
+
 
     }
 

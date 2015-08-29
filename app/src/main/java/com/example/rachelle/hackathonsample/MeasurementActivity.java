@@ -25,10 +25,15 @@ public class MeasurementActivity extends Activity {
     private static final String TAG = "MeasurementActivity: ";
 
     private static final int LINES_TO_READ = 50;
+    private static final double BASELINE_BUST_MEASUREMENT = 36.0; //starting measurements in resting garment
+    private static final double BASELINE_WAIST_MEASUREMENT = 26.0;
+    private static final double BASELINE_HIP_MEASUREMENT = 36.0;
+    private static final int HALF_INCH_OR_CM_SENSOR_CALIBRATION = 25;
+
     private int testLinesRead;
 
     private ImageView finishedCheck;
-    private int bust, waist, hip;
+    private double bust, waist, hip;
 
     private List<Integer> bustValues;
     private List<Integer> waistValues;
@@ -48,10 +53,10 @@ public class MeasurementActivity extends Activity {
         waistValues = new ArrayList<Integer>();
         hipValues = new ArrayList<Integer>();
 
-        //initialize the bust waist and hip at 0
-        bust = 0;
-        waist = 0;
-        hip = 0;
+        //initialize the bust waist and hip at 0.0
+        bust = 0.0;
+        waist = 0.0;
+        hip = 0.0;
 
 
         finishedCheck = (ImageView) findViewById(R.id.finished_check);
@@ -69,6 +74,7 @@ public class MeasurementActivity extends Activity {
 
     private void snapshotUserMeasurements() throws IOException{
         Log.d(TAG, "Entering snapshotUserMeasurements");
+
         try{
             final InputStream stream = BluetoothDevices.bluetoothSocket.getInputStream();
             final InputStreamReader streamReader = new InputStreamReader(stream);
@@ -118,22 +124,58 @@ public class MeasurementActivity extends Activity {
             close( BluetoothDevices.bluetoothSocket );
             throw e;
         }
+    }
 
+    private void computeFinalValues(){
+        //Compute averages from the sensor values, which will then need to be calibrated via our sensor value-inch relationship
+        double bustAverage = 0.0;
+        double waistAverage = 0.0;
+        double hipAverage = 0.0;
 
+        int bustSum = 0;
+        int waistSum = 0;
+        int hipSum = 0;
+
+        for (Integer number : bustValues){
+            bustSum += number;
+        }
+
+        for (Integer number : waistValues){
+            waistSum += number;
+        }
+
+        for (Integer number : hipValues){
+            hipSum += number;
+        }
+
+        bustAverage = bustSum/LINES_TO_READ;
+        waistAverage = waistSum/LINES_TO_READ;
+        hipAverage = hipSum/LINES_TO_READ;
+
+        Log.d(TAG, "Bust average: "+bustAverage);
+        Log.d(TAG, "Waist average: "+waistAverage);
+        Log.d(TAG, "Hip average: "+hipAverage);
+
+        //The assumption is that <190 represents a resting sensor with no change in the original measurement,
+        //which will be determined by measuring the garment in a relaxed state
+        if (bustAverage < 190){
+            bust = BASELINE_BUST_MEASUREMENT;
+        } else {
+
+        }
+
+                /*
         Intent intent = new Intent(this, ViewMeasurements.class);
         intent.putExtra("bust", bust);
         intent.putExtra("waist", waist);
         intent.putExtra("hip", hip);
         startActivity(intent);
         finish();
+        */
     }
 
-    private void computeFinalValues(){
-        int bustAverage = 0;
-        int waistAverage = 0;
-        int hipAverage = 0;
-
-        //for (Integer number : )
+    private double computeGrowthAmount(int growthBeyondSensorBaseline){
+        
     }
 
     private void close(Closeable aConnectedObject) {
